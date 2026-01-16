@@ -2,6 +2,263 @@
 # AI & Machine Learning for Cybersecurity – Midterm  
 ## Task 2: Email Spam Classification using Logistic Regression
 
+
+
+
+# AI & Machine Learning for Cybersecurity – Midterm  
+## Task 2: Email Spam Classification Using Logistic Regression
+
+---
+
+### 1. Dataset Upload (1 point)
+
+The dataset provided at:
+
+```
+max.ge/aiml_midterm/859458492_csv
+```
+
+has been uploaded to this repository under the name:
+
+```
+k_abashidze25_859458492.csv
+```
+
+The dataset contains pre-extracted numerical features from email messages and a binary class label indicating whether an email is **spam (1)** or **legitimate (0)**. This dataset is used directly by the implemented Python console application without modification.
+
+---
+
+### 2. Model Training on 70% of the Data  
+*(2 + 1 + 2 + 1 + 1 points)*
+
+#### 2.1 Source Code (1 point)
+
+All required functionality is implemented in a single Python file:
+
+```
+task2_email_classifier.py
+```
+
+The application executes sequentially and performs data loading, model training, validation, prediction, and visualization within one reproducible pipeline.
+
+---
+
+#### 2.2 Data Loading and Processing (2 points)
+
+**Code location:** lines 90–128
+
+```python
+df = pd.read_csv("k_abashidze25_859458492.csv")
+
+X = df[["words", "links", "capital_words", "spam_word_count"]]
+y = df["is_spam"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.30,
+    random_state=42,
+    stratify=y
+)
+```
+
+**Academic explanation:**  
+The dataset is loaded using the `pandas` library, which ensures efficient handling of tabular data. Feature selection is explicit to prevent data leakage and to ensure that only meaningful attributes are used for training. Stratified sampling is applied during the train-test split to preserve the original class distribution, which is critical for fair evaluation in binary classification problems.
+
+---
+
+#### 2.3 Logistic Regression Model (1 point)
+
+**Code location:** lines 132–142
+
+```python
+model = Pipeline([
+    ("scaler", StandardScaler()),
+    ("lr", LogisticRegression(
+        solver="lbfgs",
+        max_iter=1000
+    ))
+])
+model.fit(X_train, y_train)
+```
+
+**Academic explanation:**  
+Logistic Regression is a linear probabilistic classifier that estimates the posterior probability of class membership using the sigmoid function. It is well suited for binary classification tasks such as spam detection due to its interpretability and robustness. Feature standardization is applied to normalize the scale of input variables, improving optimization stability and convergence when using gradient-based solvers such as LBFGS.
+
+---
+
+#### 2.4 Model Coefficients (1 point)
+
+**Code location:** lines 147–163
+
+```python
+w_scaled = lr.coef_[0]
+b_scaled = lr.intercept_[0]
+
+w_original = w_scaled / scaler.scale_
+b_original = b_scaled - np.sum(w_scaled * (scaler.mean_ / scaler.scale_))
+```
+
+**Academic explanation:**  
+The learned coefficients represent the contribution of each feature to the log-odds of an email being classified as spam. Coefficients are transformed back to the original feature scale to enhance interpretability. Positive coefficients indicate features that increase spam probability, while negative coefficients indicate features associated with legitimate emails.
+
+---
+
+### 3. Model Validation  
+*(1 + 2 points)*
+
+#### 3.1 Confusion Matrix and Accuracy (1 point)
+
+**Code location:** lines 168–174
+
+```python
+y_pred = model.predict(X_test)
+cm = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+```
+
+**Academic explanation:**  
+The confusion matrix provides a detailed breakdown of classification outcomes, including true positives, true negatives, false positives, and false negatives. Accuracy is used as a global performance metric representing the proportion of correctly classified samples. Together, these metrics allow both quantitative and qualitative assessment of model performance.
+
+---
+
+### 4. Email Text Classification Capability (3 points)
+
+**Feature extraction code location:** lines 40–86
+
+```python
+tokens = TOKEN_RE.findall(text)
+links = len(LINK_RE.findall(text))
+capital_words = sum(1 for t in tokens if len(t) >= 2 and t.isupper())
+```
+
+**Prediction code location:** lines 185–194
+
+```python
+features = extract_features_from_email(text)
+prediction = model.predict([features])[0]
+```
+
+**Academic explanation:**  
+This functionality extends the trained model to real-world usage by enabling classification of raw email text. The same feature space used during training is reconstructed through deterministic parsing rules, ensuring consistency between training and inference. This approach reflects standard practices in applied machine learning systems.
+
+---
+
+### 5. Manually Composed Spam Email (1 point)
+
+**Email Text**
+```
+CONGRATULATIONS!!! YOU ARE A WINNER!
+You have been selected to receive a FREE CASH BONUS.
+Click the link below to claim your prize now:
+https://free-prize-now.example
+LIMITED TIME OFFER!!!
+```
+
+**Academic explanation:**  
+This email was intentionally designed to activate multiple spam-related features, including excessive capitalization, urgency, spam keywords, and the presence of hyperlinks. These characteristics align with the learned decision boundary of the model, resulting in a spam classification.
+
+---
+
+### 6. Manually Composed Legitimate Email (1 point)
+
+**Email Text**
+```
+Hi team,
+
+Thanks for the meeting today. Please review the attached document
+and send your feedback by Friday.
+
+Best regards,
+Project Manager
+```
+
+**Academic explanation:**  
+This email demonstrates characteristics typical of legitimate communication, such as neutral language, absence of spam keywords, and lack of hyperlinks. Consequently, the extracted feature values correspond to a low spam probability.
+
+---
+
+### 7. Visualizations (4 points)
+
+The application generates multiple visualizations using `matplotlib` to provide insights into the dataset and model behavior.
+
+---
+
+#### A. Class Distribution Study
+
+**Code location:** lines 200–213
+
+```python
+plt.bar(labels, values)
+plt.title("Class Distribution (Spam vs Legitimate)")
+plt.xlabel("Class")
+plt.ylabel("Number of emails")
+```
+
+**Academic explanation:**  
+This visualization illustrates the balance between spam and legitimate emails in the dataset. Understanding class distribution is essential for evaluating potential bias and interpreting performance metrics such as accuracy.
+
+---
+
+#### B. Confusion Matrix Heatmap
+
+**Code location:** lines 215–233
+
+```python
+plt.imshow(cm, interpolation="nearest")
+plt.title("Confusion Matrix Heatmap")
+plt.xlabel("Predicted class")
+plt.ylabel("Actual class")
+```
+
+**Academic explanation:**  
+The heatmap provides an intuitive visual summary of classification performance, highlighting misclassification patterns and enabling deeper error analysis beyond scalar metrics.
+
+---
+
+#### C. Feature Importance (Logistic Regression Coefficients)
+
+**Code location:** lines 235–251
+
+```python
+plt.bar(FEATURE_COLS, w_original)
+plt.title("Logistic Regression Coefficients")
+```
+
+**Academic explanation:**  
+This visualization emphasizes model interpretability by showing the relative importance of each feature. Such analysis is particularly valuable in cybersecurity applications, where explainability is often as important as predictive accuracy.
+
+---
+
+## How to Run
+
+```bash
+python task2_email_classifier.py
+```
+
+Generated output files are stored in:
+
+```
+task2_outputs/
+```
+
+---
+
+**Course:** AI & Machine Learning for Cybersecurity  
+**Assignment:** Midterm – Task 2  
+**Student:** K. Abashidze
+
+
+
+
+
+
+
+
+
+
+
+
 ---
 
 ## 1. Task Overview
