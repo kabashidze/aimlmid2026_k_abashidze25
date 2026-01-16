@@ -102,7 +102,7 @@ The figure below illustrates:
 
 Each colored background region represents the predicted class.
 
-![Decision Regions](task1_logistic_decision_regions.png)
+![Decision Regions]([Task1/Finding the logistic regression model coefficients - Results.png](https://github.com/kabashidze/aimlmid2026_k_abashidze25/blob/c414297526655ee32f0534460b8c3f1505eeafb8/Task1/Finding%20the%20logistic%20regression%20model%20coefficients%20-%20Results.png))
 
 ---
 
