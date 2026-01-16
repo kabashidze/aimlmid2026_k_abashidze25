@@ -1,10 +1,3 @@
-
-# AI & Machine Learning for Cybersecurity – Midterm  
-## Task 2: Email Spam Classification using Logistic Regression
-
-
-
-
 # AI & Machine Learning for Cybersecurity – Midterm  
 ## Task 2: Email Spam Classification Using Logistic Regression
 
